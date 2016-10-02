@@ -1,4 +1,4 @@
-![Icon](https://github.com/teressaeid/Bulter/blob/master/Icon/Icon.png) 
+![Icon](https://github.com/teressaeid/Butler/blob/master/Icon/Icon.png) 
 # Bulter
 
 ## Installation
