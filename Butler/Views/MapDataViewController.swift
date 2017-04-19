@@ -15,10 +15,12 @@ class MapDataViewController: UIViewController, MKMapViewDelegate, CLLocationMana
 
     @IBOutlet weak var mapView: MKMapView!
     
-    let managedObjectContext = ((UIApplication.sharedApplication().delegate) as! AppDelegate).managedObjectContext
+    let managedObjectContext = ((UIApplication.shared.delegate) as! AppDelegate).managedObjectContext
     
     var items: [Item]?
     let locationManager = CLLocationManager()
+    var points = [CLLocationCoordinate2D]()
+    var lastKnowLocation: CLLocation?
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -29,7 +31,11 @@ class MapDataViewController: UIViewController, MKMapViewDelegate, CLLocationMana
     override func viewDidLoad() {
         super.viewDidLoad()
         self.navigationController!.navigationBar.titleTextAttributes = [NSForegroundColorAttributeName: UIColor(hex: 0x0099E8)]
+        
+        
         self.mapView.delegate = self
+        
+        
         self.locationManager.delegate = self
         self.locationManager.desiredAccuracy =  kCLLocationAccuracyBest
         // Ask user for permission to use location
@@ -40,19 +46,21 @@ class MapDataViewController: UIViewController, MKMapViewDelegate, CLLocationMana
         // Do any additional setup after loading the view.
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         fetchData()
         updateMonitoredRegions()
+//        drawPolyline()
+//        generateRoute()
     }
     
     func fetchData() {
 //        print("CALLING FETCH DATA IN MAPS")
-        let fetch = NSFetchRequest(entityName: "Item")
+        let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Item")
         //Q: how to "rerange"
         //        let prioritySort  = NSSortDescriptor(key: "priority", ascending: false)
         do {
-            let fetchResults = try managedObjectContext.executeFetchRequest(fetch) as! [Item]
+            let fetchResults = try managedObjectContext.fetch(fetch) as! [Item]
             items = fetchResults
             addAnnotations()
         } catch {
@@ -70,7 +78,7 @@ class MapDataViewController: UIViewController, MKMapViewDelegate, CLLocationMana
                 let region = CLCircularRegion(center: coordinate, radius: Double(item.radius!), identifier: item.title!)
                 region.notifyOnEntry = true
                 region.notifyOnExit = true
-                locationManager.startMonitoringForRegion(region)
+                locationManager.startMonitoring(for: region)
             }
         }
     }
@@ -85,17 +93,17 @@ class MapDataViewController: UIViewController, MKMapViewDelegate, CLLocationMana
     // Clear monitored regions
     func clearMonitoredRegions() {
         for region in locationManager.monitoredRegions {
-            locationManager.stopMonitoringForRegion(region)
+            locationManager.stopMonitoring(for: region)
         }
     }
     
-    func locationManager(manager: CLLocationManager, didEnterRegion region: CLRegion) {
+    func locationManager(_ manager: CLLocationManager, didEnterRegion region: CLRegion) {
         // Notify the user when they have entered a region
         let title = "Hey! Looks like you are close to one of your tasks"
         generateMessage(title, region: region)
     }
     
-    func locationManager(manager: CLLocationManager, didExitRegion region: CLRegion) {
+    func locationManager(_ manager: CLLocationManager, didExitRegion region: CLRegion) {
         // Notify the user when they leave a region
         let title = "Oh-oh! You appear to be leaving your radius"
         generateMessage(title, region: region)
@@ -103,14 +111,14 @@ class MapDataViewController: UIViewController, MKMapViewDelegate, CLLocationMana
     }
     
     // Generate an alert/notification message when arriving/leaving a region
-    func generateMessage(title: String, region: CLRegion) {
-        if UIApplication.sharedApplication().applicationState == .Active {
+    func generateMessage(_ title: String, region: CLRegion) {
+        if UIApplication.shared.applicationState == .active {
 //            print("APP is active")
             // App is active, show an alert
-            let alertController = UIAlertController(title: title, message: region.identifier, preferredStyle: .Alert)
-            let alertAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
+            let alertController = UIAlertController(title: title, message: region.identifier, preferredStyle: .alert)
+            let alertAction = UIAlertAction(title: "OK", style: .default, handler: nil)
             alertController.addAction(alertAction)
-            self.presentViewController(alertController, animated: true, completion: nil)
+            self.present(alertController, animated: true, completion: nil)
         } else {
 //            print("APP is inactive")
             // App is inactive, show a notification
@@ -121,7 +129,7 @@ class MapDataViewController: UIViewController, MKMapViewDelegate, CLLocationMana
             // not used for now
             notification.userInfo = ["title" : title]
             notification.category = "Map_Category"
-            UIApplication.sharedApplication().presentLocalNotificationNow(notification)
+            UIApplication.shared.presentLocalNotificationNow(notification)
         }
     }
     // Add annotations on map
@@ -135,17 +143,18 @@ class MapDataViewController: UIViewController, MKMapViewDelegate, CLLocationMana
         
         for item in items! {
             // if the location information is not nil, should NEVER be, but this will prevent compiler from crashing
-            if (item.latitude != nil && item.longitude != nil){
+            if (item.latitude != nil && item.longitude != nil) {
                 let coordinate = CLLocationCoordinate2D(latitude: Double(item.latitude!), longitude: Double(item.longitude!))
+                points.append(coordinate)
                 // add marker for each location
                 let mapAnnotation = ItemAnnotation()
                 mapAnnotation.buildFromItem(item)
 //                print("Ading anotcation marker")
                 mapView.addAnnotation(mapAnnotation)
                 // add circle for each annotation
-                let circle = MKCircle(centerCoordinate: coordinate, radius: Double(item.radius!))
+                let circle = MKCircle(center: coordinate, radius: Double(item.radius!))
                 self.mapView.setRegion(MKCoordinateRegion(center: coordinate, span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)), animated: true)
-                mapView.addOverlay(circle)
+                mapView.add(circle)
             }
         }
     }
@@ -154,28 +163,34 @@ class MapDataViewController: UIViewController, MKMapViewDelegate, CLLocationMana
      // MARK: - MapView delegate
      */
  
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         // do not pin user location
         if annotation is MKUserLocation {
             return nil
         }
         let reuseId = "pin"
-        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
+        var pinView = mapView.dequeueReusableAnnotationView(withIdentifier: reuseId) as? MKPinAnnotationView
             pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
             let itemAnnotation = annotation as! ItemAnnotation
             pinView?.animatesDrop = true
 //            print("IS THIS ITEM ACTIVE \(itemAnnotation.item!.active!)")
             pinView?.pinTintColor = itemAnnotation.pinColor
             pinView?.canShowCallout = true
-            pinView?.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
+            pinView?.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
         return pinView
     }
     
-    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        self.performSegueWithIdentifier("showItem", sender: self)
+    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        self.performSegue(withIdentifier: "showItem", sender: self)
     }
     
-    func mapView(mapView: MKMapView, rendererForOverlay overlay: MKOverlay) -> MKOverlayRenderer {
+    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        if overlay is MKPolyline {
+            let polylineRenderer = MKPolylineRenderer(overlay: overlay)
+            polylineRenderer.strokeColor = UIColor(hex: 0x0099E8)
+            polylineRenderer.lineWidth = 5
+            return polylineRenderer
+        }
         let circleRenderer = MKCircleRenderer(overlay: overlay)
         // Constructing a circle overlay filled with a blue color
         circleRenderer.fillColor = UIColor(hex: 0x0099E8, alpha: 0.1)
@@ -185,25 +200,62 @@ class MapDataViewController: UIViewController, MKMapViewDelegate, CLLocationMana
     }
     
     // MARK: CLLocationManagerDelegate
-    func locationManager(manager: CLLocationManager, didChangeAuthorizationStatus status: CLAuthorizationStatus) {
+    func locationManager(_ manager: CLLocationManager, didChangeAuthorization status: CLAuthorizationStatus) {
         // Only show user location in MapView if user has authorized location tracking
-        mapView.showsUserLocation = (status == .AuthorizedAlways)
+        mapView.showsUserLocation = (status == .authorizedAlways)
     }
     
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         let location = locations.last
+        lastKnowLocation = locations.last
         let center = CLLocationCoordinate2D(latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude)
         let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta:0.02,longitudeDelta:0.02))
         self.mapView.setRegion(region, animated: true)
+        //generateRoute()
     }
+    
+    func drawPolyline() {
+        let filteredOverlays = self.mapView.overlays.filter{ $0.isKind(of: MKGeodesicPolyline.self) }
+        self.mapView.removeOverlays(filteredOverlays)
+        let lastLocation = CLLocationCoordinate2D(latitude: 40.759211, longitude: -73.984638)
+        self.points.append(lastLocation)
+        let geodesic = MKPolyline(coordinates: &points, count: points.count)
+        self.mapView.add(geodesic)
+    }
+    
+    func showRoutes(_ routes: [MKRoute]) {
+        for i in 0..<routes.count {
+            drawRoute(routes[i])
+        }
+    }
+    
+    func drawRoute(_ route: MKRoute) {
+        self.mapView.add(route.polyline)//, level: MKOverlayLevel.AboveRoads)
+    }
+    
+//    func generateRoute() {
+//        print("CAALING SORT")
+//        lastKnowLocation = CLLocation(latitude: 40.759211, longitude: -73.984638)
+//        let sortedDirections = lastKnowLocation!.coordinate.locationsSortedByDistanceFromPreviousLocation(self.points)
+//        print("SORTED DIRECTIONS COUNT\(sortedDirections.count)")
+//        print(sortedDirections)
+//        CLLocationCoordinate2D.calculateDirections(sortedDirections, transportType: .walking) { routes in
+//            // call method which adds the array of routes to the map
+////            self.showRoutes(routes)
+//            print("ROUTES are\(routes)")
+//            self.mapView.add(routes[1].polyline)
+//        }
+//    }
+    
+    
 
     /*
     // MARK: - Navigation
     }
     */
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showItem" {
-            let destinationVC = segue.destinationViewController as! AddItemTableViewController
+            let destinationVC = segue.destination as! AddItemTableViewController
             let selectedAnnotation = self.mapView.selectedAnnotations[0] as! ItemAnnotation
             destinationVC.item = selectedAnnotation.item
         }

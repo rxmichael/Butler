@@ -9,12 +9,12 @@
 import UIKit
 import CoreData
 
-class AddItemTableViewController: UITableViewController, DatePickerTableViewCellDelegate, SetLocationDelegate {
+class AddItemTableViewController: UITableViewController, DatePickerTableViewCellDelegate, UITextFieldDelegate, SetLocationDelegate {
 
     var managedObjectContext : NSManagedObjectContext?
     var item: Item?
     
-    private var date = NSDate()
+    fileprivate var date = Date()
     let titleSection = 0
     let locationSection = 1
     let rowInSection = 0
@@ -29,7 +29,7 @@ class AddItemTableViewController: UITableViewController, DatePickerTableViewCell
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        managedObjectContext = (UIApplication.sharedApplication().delegate as! AppDelegate).managedObjectContext
+        managedObjectContext = (UIApplication.shared.delegate as! AppDelegate).managedObjectContext
         tableView.tableFooterView = UIView()
         setupCells()
         self.navigationController!.navigationBar.tintColor = UIColor(hex: 0x0099E8)
@@ -45,53 +45,53 @@ class AddItemTableViewController: UITableViewController, DatePickerTableViewCell
     // MARK: - Table view data source
      */
 
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return 5
     }
 
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return 1
     }
     
     func setupCells() {
-        titleCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: rowInSection, inSection: titleSection)) as! TitleTableViewCell
-        locationCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: rowInSection, inSection: locationSection)) as! LocationTableViewCell
+        titleCell = tableView.cellForRow(at: IndexPath(row: rowInSection, section: titleSection)) as! TitleTableViewCell
+        locationCell = tableView.cellForRow(at: IndexPath(row: rowInSection, section: locationSection)) as! LocationTableViewCell
     }
 
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         switch indexPath.section {
         case 0:
-            let cell = tableView.dequeueReusableCellWithIdentifier("titleCell", forIndexPath: indexPath) as! TitleTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "titleCell", for: indexPath) as! TitleTableViewCell
             if let item = item {
                 cell.titleTextField.text = item.title
             }
             return cell
         case 1:
-            let cell = tableView.dequeueReusableCellWithIdentifier("locationCell", forIndexPath: indexPath) as!LocationTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "locationCell", for: indexPath) as!LocationTableViewCell
             if let item = item {
 //                print("ITEM location is \(item.location)")
                 cell.locationLabel.text = item.location
             }
             return cell
         case 2:
-            let cell = tableView.dequeueReusableCellWithIdentifier("dateCell", forIndexPath: indexPath) as!DateTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "dateCell", for: indexPath) as!DateTableViewCell
             if let item = item {
                 cell.date = item.dueDate!
             }
             else {
                 cell.date = date
             }
-            cell.datePicker.enabled = true
+            cell.datePicker.isEnabled = true
             cell.delegate = self
             return cell
         case 3:
-            let cell = tableView.dequeueReusableCellWithIdentifier("radiusCell", forIndexPath: indexPath) as!RadiusTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "radiusCell", for: indexPath) as!RadiusTableViewCell
             if let item = item {
                 cell.setRadius(Double(item.radius!))
             }
             return cell
         case 4:
-            let cell = tableView.dequeueReusableCellWithIdentifier("activeCell", forIndexPath: indexPath) as!ActiveTableViewCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: "activeCell", for: indexPath) as!ActiveTableViewCell
             if let item = item {
                 let active = item.active as! Bool
                 cell.activeSwitch.setOn(active, animated: true)
@@ -102,13 +102,13 @@ class AddItemTableViewController: UITableViewController, DatePickerTableViewCell
         }
     }
     
-    func datePickerTableViewCellDidUpdateDate(cell: DateTableViewCell) {
-        date = cell.date
+    func datePickerTableViewCellDidUpdateDate(_ cell: DateTableViewCell) {
+        date = cell.date as Date
     }
     
     // dynamically resize the height of the date cell
 
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         
         if indexPath.section == 2 && self.selectedRowIndex == 2 && cellTapped {
             return 244
@@ -117,7 +117,7 @@ class AddItemTableViewController: UITableViewController, DatePickerTableViewCell
         return 44
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if selectedRowIndex != indexPath.section {
             self.selectedRowIndex = indexPath.section
             self.cellTapped = true
@@ -131,7 +131,7 @@ class AddItemTableViewController: UITableViewController, DatePickerTableViewCell
     }
     
     
-    @IBAction func saveButtonClicked(sender: UIBarButtonItem) {
+    @IBAction func saveButtonClicked(_ sender: UIBarButtonItem) {
         if titleCell.titleTextField.text!.isEmpty {
             showAlert("Error", message: "Name cannot be empty", buttonPrompt: "Ok")
             return
@@ -142,39 +142,39 @@ class AddItemTableViewController: UITableViewController, DatePickerTableViewCell
         }
         if item == nil {
 //            print("Creating new enetity")
-            item = NSEntityDescription.insertNewObjectForEntityForName("Item", inManagedObjectContext: managedObjectContext!) as! Item
+            item = NSEntityDescription.insertNewObject(forEntityName: "Item", into: managedObjectContext!) as! Item
         }
-        let sections = numberOfSectionsInTableView(self.tableView)
+        let sections = numberOfSections(in: self.tableView)
         for section in 0 ..< sections {
             switch section {
             case 0:
-                let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: rowInSection, inSection: section)) as! TitleTableViewCell
+                let cell = tableView.cellForRow(at: IndexPath(row: rowInSection, section: section)) as! TitleTableViewCell
                 if item!.title != cell.titleTextField.text {
                     item!.title = cell.titleTextField.text
                 }
                 break
             case 1:
-                let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: rowInSection, inSection: section)) as! LocationTableViewCell
+                let cell = tableView.cellForRow(at: IndexPath(row: rowInSection, section: section)) as! LocationTableViewCell
                 if item!.location != cell.locationLabel.text {
                     item!.location = cell.locationLabel.text
                 }
                 break
             case 2:
-                let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: rowInSection, inSection: section)) as! DateTableViewCell
+                let cell = tableView.cellForRow(at: IndexPath(row: rowInSection, section: section)) as! DateTableViewCell
                 if item!.dueDate != cell.date {
                     item!.dueDate = cell.date
                 }
                 break
             case 3:
-                let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: rowInSection, inSection: section)) as! RadiusTableViewCell
-                if item!.radius != cell.getDescription() {
-                    item!.radius = cell.getDescription()
+                let cell = tableView.cellForRow(at: IndexPath(row: rowInSection, section: section)) as! RadiusTableViewCell
+                if item!.radius != cell.getDescription() as NSNumber {
+                    item!.radius = cell.getDescription() as NSNumber?
                 }
                 break
             case 4:
-                let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: rowInSection, inSection: section)) as! ActiveTableViewCell
-                if item!.active != cell.activeSwitch.on {
-                    item!.active = cell.activeSwitch.on
+                let cell = tableView.cellForRow(at: IndexPath(row: rowInSection, section: section)) as! ActiveTableViewCell
+                if item!.active != cell.activeSwitch.isOn as NSNumber {
+                    item!.active = cell.activeSwitch.isOn as NSNumber?
                 }
 //                print("SETTING ITEM to \(cell.activeSwitch.on)")
                 break
@@ -202,8 +202,8 @@ class AddItemTableViewController: UITableViewController, DatePickerTableViewCell
             }
         }
         if self.latitude != 0 && self.longitude != 0 {
-            item!.latitude = self.latitude
-            item!.longitude = self.longitude
+            item!.latitude = self.latitude as NSNumber?
+            item!.longitude = self.longitude as NSNumber?
         }
         do {
             try managedObjectContext!.save()
@@ -216,33 +216,33 @@ class AddItemTableViewController: UITableViewController, DatePickerTableViewCell
         
     }
     
-    func showAlert(title:String, message:String, buttonPrompt: String) {
-        let alertController = UIAlertController(title: title, message: message, preferredStyle: .Alert)
-        let alertDismissAction = UIAlertAction(title: buttonPrompt, style: .Default, handler: nil)
+    func showAlert(_ title:String, message:String, buttonPrompt: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let alertDismissAction = UIAlertAction(title: buttonPrompt, style: .default, handler: nil)
         alertController.addAction(alertDismissAction)
-        self.presentViewController(alertController, animated: true, completion: nil)
+        self.present(alertController, animated: true, completion: nil)
     }
     
     
-    func showAlertSuccess(title:String, message:String, buttonPrompt: String) {
-        let alertController = UIAlertController(title: title, message: message, preferredStyle: .Alert)
-        let alertDismissAction = UIAlertAction(title: buttonPrompt, style: .Default) {(action: UIAlertAction) in
+    func showAlertSuccess(_ title:String, message:String, buttonPrompt: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let alertDismissAction = UIAlertAction(title: buttonPrompt, style: .default) {(action: UIAlertAction) in
             // have to make a dispatch call not to get kernel error from Xcode at runtime
-            dispatch_async(dispatch_get_main_queue()) {
-                self.navigationController?.popViewControllerAnimated(true)
+            DispatchQueue.main.async {
+                self.navigationController?.popViewController(animated: true)
             }
         }
         alertController.addAction(alertDismissAction)
-        self.presentViewController(alertController, animated: true, completion: nil)
+        self.present(alertController, animated: true, completion: nil)
     }
     
     /* 
     // MARK: - SetLocationDelegate
      */
     
-    func setLocation(lastLocation: Location) {
+    func setLocation(_ lastLocation: Location) {
 //        print("set location called")
-        let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: rowInSection, inSection: locationSection)) as! LocationTableViewCell
+        let cell = tableView.cellForRow(at: IndexPath(row: rowInSection, section: locationSection)) as! LocationTableViewCell
         cell.locationLabel.text = lastLocation.name
 //        print("longitude is \(lastLocation.latitude)")
         self.latitude = lastLocation.latitude
@@ -250,13 +250,18 @@ class AddItemTableViewController: UITableViewController, DatePickerTableViewCell
 
     }
     
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    
     /*
      // MARK: - Navigation
      */
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "showMap" {
-            let destination = segue.destinationViewController as! MapViewController
+            let destination = segue.destination as! MapViewController
             if item != nil {
                 destination.lastLocation = Location(name: (item!.location)!, longitude: Double(item!.longitude!), latitude: Double(item!.latitude!))
             }

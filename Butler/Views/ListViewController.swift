@@ -14,7 +14,7 @@ class ListViewController: UIViewController, CircleMenuDelegate, UITableViewDataS
     
     @IBOutlet weak var tableView: UITableView!
     
-    let managedObjectContext = ((UIApplication.sharedApplication().delegate) as! AppDelegate).managedObjectContext
+    let managedObjectContext = ((UIApplication.shared.delegate) as! AppDelegate).managedObjectContext
     
     var listItems = [Item]()
     
@@ -40,6 +40,8 @@ class ListViewController: UIViewController, CircleMenuDelegate, UITableViewDataS
             distance: 120)
         button.delegate = self
         button.layer.cornerRadius = button.frame.size.width / 2.0
+        button.autoresizingMask = [.flexibleLeftMargin, .flexibleTopMargin, .flexibleBottomMargin, .flexibleRightMargin]
+//            UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleTopMargin
         view.addSubview(button)
         self.tableView.delegate = self
         self.tableView.dataSource = self
@@ -47,7 +49,7 @@ class ListViewController: UIViewController, CircleMenuDelegate, UITableViewDataS
         // Do any additional setup after loading the view.
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         fetchData()
     }
@@ -62,23 +64,23 @@ class ListViewController: UIViewController, CircleMenuDelegate, UITableViewDataS
     // MARK: - CircleMenu Delegate
      */
     
-    func circleMenu(circleMenu: CircleMenu, willDisplay button: UIButton, atIndex: Int) {
+    func circleMenu(_ circleMenu: CircleMenu, willDisplay button: UIButton, atIndex: Int) {
         button.backgroundColor = items[atIndex].color
-        button.setImage(UIImage(imageLiteral: items[atIndex].icon), forState: .Normal)
+        button.setImage(UIImage(named: items[atIndex].icon), for: .normal)
         
         // set highlited image
-        let highlightedImage  = UIImage(imageLiteral: items[atIndex].icon).imageWithRenderingMode(.AlwaysTemplate)
-        button.setImage(highlightedImage, forState: .Highlighted)
+        let highlightedImage  = UIImage(named: items[atIndex].icon)?.withRenderingMode(.alwaysTemplate)
+        button.setImage(highlightedImage, for: .highlighted)
         button.tintColor = UIColor.init(colorLiteralRed: 0, green: 0, blue: 0, alpha: 0.3)
     }
     
-    func circleMenu(circleMenu: CircleMenu, buttonWillSelected button: UIButton, atIndex: Int) {
+    func circleMenu(_ circleMenu: CircleMenu, buttonWillSelected button: UIButton, atIndex: Int) {
 //        print("button will selected: \(atIndex)")
     }
     
-    func circleMenu(circleMenu: CircleMenu, buttonDidSelected button: UIButton, atIndex: Int) {
+    func circleMenu(_ circleMenu: CircleMenu, buttonDidSelected button: UIButton, atIndex: Int) {
 //        print("button did selected: \(atIndex)")
-        self.performSegueWithIdentifier("addItem", sender: self)
+        self.performSegue(withIdentifier: "addItem", sender: self)
         // not used for now
 //        switch atIndex {
 //        case 0:
@@ -92,12 +94,12 @@ class ListViewController: UIViewController, CircleMenuDelegate, UITableViewDataS
     // core data operations methods
     
     func fetchData() {
-        let fetch = NSFetchRequest(entityName: "Item")
+        let fetch = NSFetchRequest<NSFetchRequestResult>(entityName: "Item")
         //Q: how to "rerange"
         let dateSort  = NSSortDescriptor(key: "dueDate", ascending: true)
         fetch.sortDescriptors = [dateSort]
         do {
-            let fetchResults = try managedObjectContext.executeFetchRequest(fetch) as! [Item]
+            let fetchResults = try managedObjectContext.fetch(fetch) as! [Item]
             listItems = fetchResults
             tableView.reloadData()
         } catch let error as NSError  {
@@ -105,10 +107,10 @@ class ListViewController: UIViewController, CircleMenuDelegate, UITableViewDataS
         }
     }
     
-    func deleteFromCoreData(indexPath: NSIndexPath) {
+    func deleteFromCoreData(_ indexPath: IndexPath) {
 
         let oldItem = listItems[indexPath.row]
-        managedObjectContext.deleteObject(oldItem)
+        managedObjectContext.delete(oldItem)
         do {
             try managedObjectContext.save()
             showAlertWithOk("Successfully deleted", message: "Item successfuly deleted from storage")
@@ -123,31 +125,31 @@ class ListViewController: UIViewController, CircleMenuDelegate, UITableViewDataS
     // MARK: Tableview methods
      */
     
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
         return listItems.count
     }
     
-    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        if editingStyle == .Delete {
-            let uiAlert = UIAlertController(title: "Delete Item", message: "Are you sure you want to delete this item?", preferredStyle: .Alert)
-            uiAlert.addAction(UIAlertAction(title: "Yes", style: .Default, handler: { action in
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let uiAlert = UIAlertController(title: "Delete Item", message: "Are you sure you want to delete this item?", preferredStyle: .alert)
+            uiAlert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { action in
                 self.deleteFromCoreData(indexPath)
-                self.listItems.removeAtIndex(indexPath.row)
-                tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .None)
+                self.listItems.remove(at: indexPath.row)
+                tableView.deleteRows(at: [indexPath], with: .none)
             }))
-            uiAlert.addAction(UIAlertAction(title: "Cancel", style: .Cancel, handler: nil))
-            self.presentViewController(uiAlert, animated: true, completion: nil)   
+            uiAlert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+            self.present(uiAlert, animated: true, completion: nil)   
         }
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCellWithIdentifier("myCell", forIndexPath: indexPath) as! ItemTableViewCell
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "myCell", for: indexPath) as! ItemTableViewCell
         let item = listItems[indexPath.row]
         cell.titleLabel!.text = item.title
-        cell.dateLabel!.text = NSDateFormatter.localizedStringFromDate(item.dueDate!, dateStyle: .ShortStyle, timeStyle: .NoStyle)
+        cell.dateLabel!.text = DateFormatter.localizedString(from: item.dueDate! as Date, dateStyle: .short, timeStyle: .none)
         
-        if item.dueDate!.timeIntervalSinceDate(NSDate()).isSignMinus {
+        if (item.dueDate! as NSDate).timeIntervalSince(NSDate() as Date).sign == .minus {
             // due date has passed
             cell.dateLabel.textColor = UIColor(hex: 0xFF8C00)//FF7F00)//FF9500)
         } else {
@@ -164,38 +166,38 @@ class ListViewController: UIViewController, CircleMenuDelegate, UITableViewDataS
         return cell
     }
     
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
-    func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return "Here's your agenda"
     }
     
-    func tableView(tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
         // get header as a view
         let header: UITableViewHeaderFooterView = view as! UITableViewHeaderFooterView
         // set background color and text color
         header.contentView.backgroundColor = UIColor(hex: 0xF3F2F1)//UIColor(hex: 0x0099E8)
         header.textLabel!.textColor = UIColor(hex: 0x0099E8)//UIColor.whiteColor()//(hex: 0xFF9912)
-        header.textLabel!.textAlignment = .Center
+        header.textLabel!.textAlignment = .center
     }
     
     // helper function to display a UI alert controller
-    func showAlertWithOk(title:String, message:String) {
-        let alertController = UIAlertController(title: title, message: message, preferredStyle: .Alert)
-        let alertDismissAction = UIAlertAction(title: "Ok", style: .Default, handler: nil)
+    func showAlertWithOk(_ title:String, message:String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let alertDismissAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
         alertController.addAction(alertDismissAction)
-        self.presentViewController(alertController, animated: true, completion: nil)
+        self.present(alertController, animated: true, completion: nil)
     }
     
     /*
      // MARK: - Navigation
      */
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "detailItem" {
-            let detailVC = segue.destinationViewController as! AddItemTableViewController
+            let detailVC = segue.destination as! AddItemTableViewController
             let item = listItems[(tableView.indexPathForSelectedRow?.row)!]
 //            print("Selected item is \(item)")
             detailVC.item = item

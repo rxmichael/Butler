@@ -15,7 +15,7 @@ import CoreData
 extension Item {
 
     @NSManaged var active: NSNumber?
-    @NSManaged var dueDate: NSDate?
+    @NSManaged var dueDate: Date?
     @NSManaged var latitude: NSNumber?
     @NSManaged var location: String?
     @NSManaged var longitude: NSNumber?

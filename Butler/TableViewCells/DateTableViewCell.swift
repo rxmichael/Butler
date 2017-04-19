@@ -9,16 +9,16 @@
 import UIKit
 
 protocol DatePickerTableViewCellDelegate: class {
-    func datePickerTableViewCellDidUpdateDate(cell: DateTableViewCell)
+    func datePickerTableViewCellDidUpdateDate(_ cell: DateTableViewCell)
 }
 
 class DateTableViewCell: UITableViewCell {
 
 
-    private var datePickerExpandedHeight: CGFloat = 0
+    fileprivate var datePickerExpandedHeight: CGFloat = 0
     weak var delegate: DatePickerTableViewCellDelegate?
     
-    var date: NSDate {
+    var date: Date {
         get {
             return datePicker.date
         }
@@ -39,24 +39,24 @@ class DateTableViewCell: UITableViewCell {
         // Initialization code
 //        datePickerExpanded = datePickerHeightConstraint.constant
 //        print("datepicker expanded height \(datePickerExpandedHeight)")
-        self.layoutMargins = UIEdgeInsetsZero
-        self.selectionStyle = .None
+        self.layoutMargins = UIEdgeInsets.zero
+        self.selectionStyle = .none
         setSelected(true, animated: false)
         dateChanged(datePicker)
     }
     
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-        if selected && datePicker.enabled {
-            let closed = datePicker.hidden
+        if selected && datePicker.isEnabled {
+            let closed = datePicker.isHidden
             
-            datePicker.hidden = !closed
+            datePicker.isHidden = !closed
             datePickerHeightConstraint.constant = closed ? datePickerExpandedHeight : 0
         }
     }
     
-    @IBAction func dateChanged(sender: UIDatePicker) {
-        dateLabel.text = NSDateFormatter.localizedStringFromDate(date, dateStyle: .ShortStyle, timeStyle: .ShortStyle)
+    @IBAction func dateChanged(_ sender: UIDatePicker) {
+        dateLabel.text = DateFormatter.localizedString(from: date, dateStyle: .short, timeStyle: .short)
         
         delegate?.datePickerTableViewCellDidUpdateDate(self)
     }

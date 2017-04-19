@@ -1,12 +1,12 @@
 PODS:
-  - CircleMenu (1.0.7)
+  - CircleMenu (2.0.1)
 
 DEPENDENCIES:
-  - CircleMenu (~> 1.0.0)
+  - CircleMenu
 
 SPEC CHECKSUMS:
-  CircleMenu: ddd8000fe2774497c367b8f6fcc2354a9a28f4db
+  CircleMenu: a964e8b03aae58c84b40d5cf64630b62bef077eb
 
-PODFILE CHECKSUM: e50896ec29d036cdbde5843d545d8178d3960379
+PODFILE CHECKSUM: 60152eb7aa49f12ef4fa02cad870583eb0062508
 
-COCOAPODS: 1.0.1
+COCOAPODS: 1.1.1

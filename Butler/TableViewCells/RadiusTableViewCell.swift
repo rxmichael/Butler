@@ -14,13 +14,13 @@ class RadiusTableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-        self.layoutMargins = UIEdgeInsetsZero
-        self.selectionStyle = .None
+        self.layoutMargins = UIEdgeInsets.zero
+        self.selectionStyle = .none
     }
 
     @IBOutlet weak var radiusSegment: UISegmentedControl!
     
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         // Configure the view for the selected state
     }
@@ -37,7 +37,7 @@ class RadiusTableViewCell: UITableViewCell {
             return 1000.0
         }
     }
-    func setRadius(radius: Double) {
+    func setRadius(_ radius: Double) {
         switch radius {
         case 50.0:
             self.radiusSegment.selectedSegmentIndex = 0

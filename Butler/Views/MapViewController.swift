@@ -10,7 +10,7 @@ import UIKit
 import MapKit
 
 protocol SetLocationDelegate {
-    func setLocation(lastLocation: Location)
+    func setLocation(_ lastLocation: Location)
 }
 
 class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerDelegate, UISearchBarDelegate {
@@ -52,7 +52,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         // Dispose of any resources that can be recreated.
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         if (lastLocation != nil) {
             let newCoordinates = CLLocationCoordinate2D(latitude: lastLocation!.latitude, longitude: lastLocation!.longitude)
@@ -70,21 +70,21 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
     
     
-    func searchBarSearchButtonClicked(searchBar: UISearchBar){
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar){
 //        print("SEARCH CLICked")
         searchBar.resignFirstResponder()
-        if let location = searchBar.text where !location.isEmpty{
+        if let location = searchBar.text, !location.isEmpty{
             geocoder.geocodeAddressString(location, completionHandler: { (placemarks, error) in
                 if error != nil {
                     // Handle potential errors
-                    if (error?.code == 8) {
-                        // No result found with geocode request
-                        // Show alert to user
-                        self.showAlertWithDismiss("No result found", message: "Unable to provide a location for your search request.")
-                    } else {
-                        // Other error, print to console
-                        print(error?.localizedDescription)
-                    }
+//                    if (error?.code == 8) {
+//                        // No result found with geocode request
+//                        // Show alert to user
+//                        self.showAlertWithDismiss("No result found", message: "Unable to provide a location for your search request.")
+//                    } else {
+//                        // Other error, print to console
+//                        print(error?.localizedDescription)
+//                    }
                 }
                 // Get the first location result and add it to the map
                 if let placemark = placemarks?.first {
@@ -113,32 +113,32 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     }
      */
     
-     @IBAction func doneButtonPressed(sender: UIBarButtonItem) {
+     @IBAction func doneButtonPressed(_ sender: UIBarButtonItem) {
         self.showAlertConfirm("Choose this location", message: "Are you sure this is the location?")
      }
     
     // Helper function to produce an alert for the user
-    func showAlertWithDismiss(title:String, message:String) {
-        let alertController = UIAlertController(title: title, message: message, preferredStyle: .Alert)
-        let alertDismissAction = UIAlertAction(title: "Dismiss", style: .Default, handler: nil)
+    func showAlertWithDismiss(_ title:String, message:String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let alertDismissAction = UIAlertAction(title: "Dismiss", style: .default, handler: nil)
         alertController.addAction(alertDismissAction)
-        self.presentViewController(alertController, animated: true, completion: nil)
+        self.present(alertController, animated: true, completion: nil)
     }
     
-    func showAlertConfirm(title: String, message: String) {
-        let blur = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.Dark))
+    func showAlertConfirm(_ title: String, message: String) {
+        let blur = UIVisualEffectView(effect: UIBlurEffect(style: UIBlurEffectStyle.dark))
         blur.frame = self.view.bounds
         blur.alpha = 1
-        blur.autoresizingMask = [.FlexibleWidth, .FlexibleHeight] // for supporting device rotation
+        blur.autoresizingMask = [.flexibleWidth, .flexibleHeight] // for supporting device rotation
         
-        let alertController = UIAlertController(title: title, message: message, preferredStyle: .Alert)
-        let yesAction = UIAlertAction(title: "Yeah, that's right", style: .Default) { (action:UIAlertAction) in
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let yesAction = UIAlertAction(title: "Yeah, that's right", style: .default) { (action:UIAlertAction) in
             if let location = self.lastLocation {
                 self.setLocationDelegate?.setLocation(location)
-                self.navigationController?.popViewControllerAnimated(true)
+                self.navigationController?.popViewController(animated: true)
             }
             else {
-                UIView.animateWithDuration(0.7, animations: {
+                UIView.animate(withDuration: 0.7, animations: {
                     //  EITHER...
                     //blur.effect = nil
                     blur.alpha = 0
@@ -148,8 +148,8 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
                 self.showAlertWithDismiss("Location missing", message: "Are you sure you picked a location?")
             }
         }
-        let cancelAction = UIAlertAction(title: "No, let me think again", style: .Default) { (action:UIAlertAction) in
-            UIView.animateWithDuration(0.7, animations: {
+        let cancelAction = UIAlertAction(title: "No, let me think again", style: .default) { (action:UIAlertAction) in
+            UIView.animate(withDuration: 0.7, animations: {
                 //  EITHER...
                 //blur.effect = nil
                 blur.alpha = 0
@@ -160,37 +160,37 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
         view.addSubview(blur)
         alertController.addAction(yesAction)
         alertController.addAction(cancelAction)
-        self.presentViewController(alertController, animated: true, completion:nil)
+        self.present(alertController, animated: true, completion:nil)
     }
     
     /* 
     // MARK: - MapViewDelegate
      */
     
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         // do not pin user location
         if annotation is MKUserLocation {
             return nil }
         else {
             let pinView:MKPinAnnotationView = MKPinAnnotationView()
             pinView.annotation = annotation
-            pinView.pinTintColor = UIColor.redColor()
+            pinView.pinTintColor = UIColor.red
             pinView.animatesDrop = true
             pinView.canShowCallout = true
-            pinView.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
+            pinView.rightCalloutAccessoryView = UIButton(type: .detailDisclosure)
             return pinView
         }
     }
     
-    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+    func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         self.showAlertConfirm("Choose this location", message: "Are you sure this is the location?")
     }
 
-    func didLongPressMap(sender: UILongPressGestureRecognizer) {
-        if sender.state == UIGestureRecognizerState.Began {
+    func didLongPressMap(_ sender: UILongPressGestureRecognizer) {
+        if sender.state == UIGestureRecognizerState.began {
             self.mapView.removeAnnotations(self.mapView.annotations)
-            let touchPoint = sender.locationInView(self.mapView)
-            let touchCoordinate = self.mapView.convertPoint(touchPoint, toCoordinateFromView: self.mapView)
+            let touchPoint = sender.location(in: self.mapView)
+            let touchCoordinate = self.mapView.convert(touchPoint, toCoordinateFrom: self.mapView)
 //            print("Lat: \(touchCoordinate.latitude) and Long: \(touchCoordinate.longitude)")
             let annotation = MKPointAnnotation()
             annotation.coordinate = touchCoordinate
@@ -223,7 +223,7 @@ class MapViewController: UIViewController, MKMapViewDelegate, CLLocationManagerD
     // MARK: - CLLocationManagerDelegate
      */
     
-    func locationManager(manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         let location = locations.last
         let center = CLLocationCoordinate2D(latitude: location!.coordinate.latitude, longitude: location!.coordinate.longitude)
         let region = MKCoordinateRegion(center: center, span: MKCoordinateSpan(latitudeDelta:0.02,longitudeDelta:0.02))

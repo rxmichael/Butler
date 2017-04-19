@@ -13,12 +13,12 @@ class ActiveTableViewCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-        self.layoutMargins = UIEdgeInsetsZero
-        self.selectionStyle = .None
+        self.layoutMargins = UIEdgeInsets.zero
+        self.selectionStyle = .none
     }
 
     @IBOutlet weak var activeSwitch: UISwitch!
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state

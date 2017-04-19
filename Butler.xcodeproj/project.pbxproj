@@ -29,6 +29,7 @@
 		E55CFF6D1D7EFFFC006B3A42 /* DateTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55CFF6C1D7EFFFC006B3A42 /* DateTableViewCell.swift */; };
 		E55CFF6F1D83481B006B3A42 /* RadiusTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E55CFF6E1D83481B006B3A42 /* RadiusTableViewCell.swift */; };
 		E5DB07D11DA1432400C005CA /* customsound.caf in Resources */ = {isa = PBXBuildFile; fileRef = E5DB07D01DA1432400C005CA /* customsound.caf */; };
+		E5F6EB331DA43EDD0039B863 /* CLLocationCoorindate2D+Routes.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F6EB321DA43EDC0039B863 /* CLLocationCoorindate2D+Routes.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +59,7 @@
 		E55CFF6E1D83481B006B3A42 /* RadiusTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RadiusTableViewCell.swift; sourceTree = "<group>"; };
 		E5700B66E0BCD0B615112A7C /* Pods-Butler.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Butler.release.xcconfig"; path = "Pods/Target Support Files/Pods-Butler/Pods-Butler.release.xcconfig"; sourceTree = "<group>"; };
 		E5DB07D01DA1432400C005CA /* customsound.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = customsound.caf; sourceTree = "<group>"; };
+		E5F6EB321DA43EDC0039B863 /* CLLocationCoorindate2D+Routes.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CLLocationCoorindate2D+Routes.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -132,6 +134,7 @@
 			isa = PBXGroup;
 			children = (
 				E55CFF581D7CA71D006B3A42 /* UIColor+Additions.swift */,
+				E5F6EB321DA43EDC0039B863 /* CLLocationCoorindate2D+Routes.swift */,
 			);
 			name = Extensions;
 			path = Butler/Extensions;
@@ -202,11 +205,13 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0820;
 				ORGANIZATIONNAME = com.teressa;
 				TargetAttributes = {
 					E52BBEAC1D66888100D27F38 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = C22UGULQCC;
+						LastSwiftMigration = 0820;
 					};
 				};
 			};
@@ -285,7 +290,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -306,6 +311,7 @@
 				E55CFF621D7D8E4E006B3A42 /* MapViewController.swift in Sources */,
 				E509558B1D86F52D00AB2701 /* ItemAnnotation.swift in Sources */,
 				E55CFF5B1D7D8527006B3A42 /* AddItemTableViewController.swift in Sources */,
+				E5F6EB331DA43EDD0039B863 /* CLLocationCoorindate2D+Routes.swift in Sources */,
 				E50955951D86FE7700AB2701 /* Item.swift in Sources */,
 				E52BBEB91D66888100D27F38 /* Butler.xcdatamodeld in Sources */,
 				E55CFF561D7C8C09006B3A42 /* ListViewController.swift in Sources */,
@@ -351,8 +357,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -396,8 +404,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -416,6 +426,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -424,11 +435,14 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 82169A0C83FC70AA91A12568 /* Pods-Butler.debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = Butler/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.teressa.Butler;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -436,11 +450,14 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = E5700B66E0BCD0B615112A7C /* Pods-Butler.release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
 				INFOPLIST_FILE = Butler/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.teressa.Butler;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};

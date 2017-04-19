@@ -7,6 +7,6 @@ target 'Butler' do
 
   # Pods for Butler
   
-  pod 'CircleMenu', '~> 1.0.0'
+  pod 'CircleMenu'
 
 end
